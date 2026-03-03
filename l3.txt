@@ -731,6 +731,8 @@ mysql>
 
 22 )
 
+
+
  Department average salary & count of employees with commission
 SELECT d.dept_name,
        AVG(e.salary) AS avg_salary,
@@ -743,71 +745,8 @@ GROUP BY d.dept_name;
 
 
 
+23  )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-23  
 
 
  View for Delhi location
@@ -845,35 +784,19 @@ WHERE dept_name = 'Finance';
 empty
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 25  
 
- Update phone number through view
+Update phone number through view
 UPDATE emp_view
 SET phone_no = '88888888'
 WHERE first_name = 'Rahul';
+
+
+---output-----------
+---
+
+
+
 
 26 
 
@@ -886,6 +809,26 @@ WHERE NOT EXISTS (
     WHERE d.employee_id = e.employee_id
 );
 
+----output------------
+
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary  | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+|         103 | Adhai      | Kumar     | adhai@gmail.com | 8844     | 2021-07-10 | FIN_ACC | 8000.00 |        101 |       3 |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
 
 
 27  
@@ -895,12 +838,26 @@ WHERE NOT EXISTS (
 SELECT *
 FROM employees
 WHERE manager_id = 101
-
 UNION
-
 SELECT *
 FROM employees
 WHERE manager_id = 201;
+
+
+
+
+-----output---------
+
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary  | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+|         102 | Vivek      | Kumar     | vivek@gmail.com | 9998     | 2022-08-10 | HR_REP  | 9000.00 |        101 |       2 |
+|         103 | Adhai      | Kumar     | adhai@gmail.com | 8844     | 2021-07-10 | FIN_ACC | 8000.00 |        101 |       3 |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+
 
 28  
 
@@ -912,6 +869,21 @@ WHERE EXISTS (
     FROM dependents d
     WHERE d.employee_id = e.employee_id
 );
+
+
+----output-------
+
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary   | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+|         101 | Rahul      | Krishna   | rahul@gmail.com | 88888888 | 2022-01-10 | IT_PROG | 15000.00 |       NULL |       1 |
+|         102 | Vivek      | Kumar     | vivek@gmail.com | 9998     | 2022-08-10 | HR_REP  |  9000.00 |        101 |       2 |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+u
+
 
 
 
