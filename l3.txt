@@ -1,0 +1,945 @@
+CREATE DATABASE labdb;
+USE labdb;
+
+
+
+CREATE TABLE regions (
+    region_id INT PRIMARY KEY,
+    region_name VARCHAR(50) NOT NULL
+);
+
+
+
+CREATE TABLE countries (
+    country_id VARCHAR(5) PRIMARY KEY,
+    country_name VARCHAR(50) NOT NULL,
+    region_id INT,
+    FOREIGN KEY (region_id) REFERENCES regions(region_id)
+);
+
+
+
+CREATE TABLE locations (
+    location_id INT PRIMARY KEY,
+    street_address VARCHAR(100),
+    postal_code VARCHAR(20),
+    city VARCHAR(50),
+    state_province VARCHAR(50),
+    country_id VARCHAR(5),
+    FOREIGN KEY (country_id) REFERENCES countries(country_id)
+);
+
+
+
+CREATE TABLE departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50),
+    location_id INT,
+    FOREIGN KEY (location_id) REFERENCES locations(location_id)
+);
+
+
+
+CREATE TABLE jobs (
+    job_id VARCHAR(10) PRIMARY KEY,
+    job_title VARCHAR(50),
+    min_salary DECIMAL(10,2),
+    max_salary DECIMAL(10,2)
+);
+
+
+
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    phone_no VARCHAR(20),
+    hire_date DATE,
+    job_id VARCHAR(10),
+    salary DECIMAL(10,2),
+    manager_id INT,
+    dept_id INT,
+    FOREIGN KEY (job_id) REFERENCES jobs(job_id),
+    FOREIGN KEY (manager_id) REFERENCES employees(employee_id),
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+);
+
+
+
+CREATE TABLE dependents (
+    dependent_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    relationship VARCHAR(30),
+    employee_id INT,
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+);
+
+
+
+
+INSERT INTO regions VALUES
+(1, 'Asia'),
+(2, 'Europe');
+
+
+
+
+INSERT INTO countries VALUES
+('IN', 'India', 1),
+('UK', 'United Kingdom', 2);
+
+
+
+
+
+INSERT INTO locations VALUES
+(1700, 'MG Road', '56001', 'Kochi', 'Kerala', 'IN'),
+(1800, 'Oxford St', 'OX80', 'London', 'London', 'UK');
+
+
+
+
+INSERT INTO departments VALUES
+(1, 'IT', 1700),
+(2, 'HR', 1700),
+(3, 'Finance', 1800),
+(4, 'Marketing', 1800);
+
+
+
+
+INSERT INTO jobs VALUES
+('IT_PROG', 'Programmer', 5000, 20000),
+('HR_REP', 'HR Representative', 4000, 15000),
+('FIN_ACC', 'Accountant', 6000, 18000),
+('MARK_MAN', 'Marketing Manager', 8000, 25000);
+
+
+
+INSERT INTO employees VALUES
+(101, 'Rahul', 'Krishna', 'rahul@gmail.com', '9999',
+'2022-01-10', 'IT_PROG', 15000, NULL, 1),
+
+(102, 'Vivek', 'Kumar', 'vivek@gmail.com', '9998',
+'2022-08-10', 'HR_REP', 9000, 101, 2),
+
+(103, 'Adhai', 'Kumar', 'adhai@gmail.com', '8844',
+'2021-07-10', 'FIN_ACC', 8000, 101, 3);
+
+
+
+INSERT INTO dependents VALUES
+(1, 'Anu', 'Sharma', 'Daughter', 101),
+(2, 'Sara', 'Khan', 'Wife', 102);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.  SELECT *
+FROM employees
+WHERE dept_id IN (
+    SELECT dept_id
+    FROM departments
+    WHERE location_id = 1700
+);
+
+
+--output------
+
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary   | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+|         101 | Rahul      | Krishna   | rahul@gmail.com | 9999     | 2022-01-10 | IT_PROG | 15000.00 |       NULL |       1 |
+|         102 | Vivek      | Kumar     | vivek@gmail.com | 9998     | 2022-08-10 | HR_REP  |  9000.00 |        101 |       2 |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+2 
+
+ Employees NOT in location 1700
+SELECT *
+FROM employees
+WHERE dept_id NOT IN (
+    SELECT dept_id
+    FROM departments
+    WHERE location_id = 1700
+);
+
+
+
+--output-----
+
+-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary  | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+|         103 | Adhai      | Kumar     | adhai@gmail.com | 8844     | 2021-07-10 | FIN_ACC | 8000.00 |        101 |       3 |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+3  Employees with highest salary
+
+
+
+SELECT *
+FROM employees
+WHERE salary = (
+    SELECT MAX(salary)
+    FROM employees
+);
+
+
+
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary   | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+|         101 | Rahul      | Krishna   | rahul@gmail.com | 9999     | 2022-01-10 | IT_PROG | 15000.00 |       NULL |       1 |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+1 row in set (0.00 sec)
+
+
+
+
+
+
+
+4   Salary greater than average salary
+SELECT *
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+);
+
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary   | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+|         101 | Rahul      | Krishna   | rahul@gmail.com | 9999     | 2022-01-10 | IT_PROG | 15000.00 |       NULL |       1 |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+1 row in set (0.00 sec)
+
+
+
+
+
+5  Departments having employee salary > 10000
+SELECT dept_id, dept_name
+FROM departments
+WHERE dept_id IN (
+    SELECT dept_id
+    FROM employees
+    WHERE salary > 10000
+);
+
+
+
+--output----
++---------+-----------+
+| dept_id | dept_name |
++---------+-----------+
+|       1 | IT        |
++---------+-----------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6   Departments having NO employee salary > 10000
+SELECT dept_id, dept_name
+FROM departments
+WHERE dept_id NOT IN (
+    SELECT dept_id
+    FROM employees
+    WHERE salary > 10000
+);
+
+
++---------+-----------+
+| dept_id | dept_name |
++---------+-----------+
+|       2 | HR        |
+|       3 | Finance   |
+|       4 | Marketing |
++---------+-----------+
+3 rows in set (0.00 sec)
+
+
+
+
+
+
+
+
+
+7   Salary greater than lowest salary of every department
+SELECT *
+FROM employees
+WHERE salary > ALL (
+    SELECT MIN(salary)
+    FROM employees
+    GROUP BY dept_id
+);
+
+
+--output----
+
+
+empty set
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8   Salary ≥ highest salary of every department
+SELECT *
+FROM employees
+WHERE salary >= ALL (
+    SELECT MAX(salary)
+    FROM employees
+    GROUP BY dept_id
+);
+
+
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary   | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+|         101 | Rahul      | Krishna   | rahul@gmail.com | 9999     | 2022-01-10 | IT_PROG | 15000.00 |       NULL |       1 |
++-------------+------------+-----------+-----------------+----------+------------+---------+----------+------------+---------+
+1 row in set (0.00 sec)
+
+
+
+
+
+9  Average of department averages
+SELECT AVG(avg_salary)
+FROM (
+    SELECT AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY dept_id
+) AS dept_avg;
+
+
+---output------
+
++------------------+
+| AVG(avg_salary)  |
++------------------+
+| 10666.6666666667 |
++------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+10 
+
+Salary, overall average salary and difference
+SELECT salary,
+       (SELECT AVG(salary) FROM employees) AS avg_salary,
+       salary - (SELECT AVG(salary) FROM employees) AS difference
+FROM employees;
+
+
+
+----output---
+
++----------+--------------+--------------+
+| salary   | avg_salary   | difference   |
++----------+--------------+--------------+
+| 15000.00 | 10666.666667 |  4333.333333 |
+|  9000.00 | 10666.666667 | -1666.666667 |
+|  8000.00 | 10666.666667 | -2666.666667 |
++----------+--------------+--------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+11) Salary greater than department average (Correlated subquery)
+SELECT *
+FROM employees e
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+    WHERE dept_id = e.dept_id
+);
+
+
+
+
+---output------
+
+empty
+
+
+
+
+
+12   Employees with NO dependents
+
+
+SELECT *
+FROM employees
+WHERE employee_id NOT IN (
+    SELECT employee_id
+    FROM dependents
+);
+
+
+---output--------
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+| employee_id | first_name | last_name | email           | phone_no | hire_date  | job_id  | salary  | manager_id | dept_id |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+|         103 | Adhai      | Kumar     | adhai@gmail.com | 8844     | 2021-07-10 | FIN_ACC | 8000.00 |        101 |       3 |
++-------------+------------+-----------+-----------------+----------+------------+---------+---------+------------+---------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+13  Employees in department 1,2,3
+
+SELECT first_name, last_name
+FROM employees
+WHERE dept_id IN (10,20,30);
+
+
+---output-------
+
++------------+-----------+
+| first_name | last_name |
++------------+-----------+
+| Rahul      | Krishna   |
+| Vivek      | Kumar     |
+| Adhai      | Kumar     |
++------------+-----------+
+3 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+14   Dept 1,2,3 AND salary > 10000
+
+
+SELECT first_name, last_name, salary
+FROM employees
+WHERE dept_id IN (1,2,3)
+AND salary > 10000;
+
+
++------------+-----------+----------+
+| first_name | last_name | salary   |
++------------+-----------+----------+
+| Rahul      | Krishna   | 15000.00 |
++------------+-----------+----------+
+1 row in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+15 Department details
+
+
+SELECT dept_name
+FROM departments;
+
+
+
++-----------+
+| dept_name |
++-----------+
+| IT        |
+| HR        |
+| Finance   |
+| Marketing |
++-----------+
+4 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+16 
+  
+Employees with department name (JOIN)
+
+
+mysql> SELECT e.first_name,
+    ->        e.last_name,
+    ->        e.dept_id,
+    ->        d.dept_name
+    -> FROM employees e
+    -> JOIN departments d
+    ->   ON e.dept_id = d.dept_id;
++------------+-----------+---------+-----------+
+| first_name | last_name | dept_id | dept_name |
++------------+-----------+---------+-----------+
+| Rahul      | Krishna   |       1 | IT        |
+| Vivek      | Kumar     |       2 | HR        |
+| Adhai      | Kumar     |       3 | Finance   |
++------------+-----------+---------+-----------+
+3 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+17  
+
+
+ First name contains 'z'
+SELECT first_name, last_name, dept_id
+FROM employees
+WHERE first_name LIKE '%z%';
+
+
+
+empty
+
+
+
+
+18  
+
+ All departments including those without employees
+mysql> SELECT d.dept_id,
+    ->        d.dept_name,
+    ->        e.first_name
+    -> FROM departments d
+    -> LEFT JOIN employees e
+    -> ON d.dept_id = e.dept_id;
++---------+-----------+------------+
+| dept_id | dept_name | first_name |
++---------+-----------+------------+
+|       1 | IT        | Rahul      |
+|       2 | HR        | Vivek      |
+|       3 | Finance   | Adhai      |
+|       4 | Marketing | NULL       |
++---------+-----------+------------+
+4 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+19  
+
+
+ Employees and their managers
+SELECT e.first_name AS employee_name,
+       m.first_name AS manager_name
+FROM employees e
+LEFT JOIN employees m
+ON e.manager_id = m.employee_id;
+
+
+
+
++---------------+--------------+
+| employee_name | manager_name |
++---------------+--------------+
+| Vivek         | Rahul        |
+| Adhai         | Rahul        |
+| Rahul         | NULL         |
++---------------+--------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+
+20  
+
+
+Employees in same department as 'Taylor'
+SELECT first_name, last_name, dept_id
+FROM employees
+WHERE dept_id = (
+    SELECT dept_id
+    FROM employees
+    WHERE last_name = 'Taylor'
+);
+
+
+
+
+empty set
+
+
+
+21  
+
+Difference between job max salary and employee salary
+SELECT j.job_title,
+       e.first_name,
+       (j.max_salary - e.salary) AS salary_difference
+FROM employees e
+JOIN jobs j
+ON e.job_id = j.job_id;
+
+
+
+| job_title         | first_name | salary_difference |
++-------------------+------------+-------------------+
+| Accountant        | Adhai      |          10000.00 |
+| HR Representative | Vivek      |           6000.00 |
+| Programmer        | Rahul      |           5000.00 |
++-------------------+------------+-------------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+
+
+
+
+
+
+
+22 )
+
+ Department average salary & count of employees with commission
+SELECT d.dept_name,
+       AVG(e.salary) AS avg_salary,
+       COUNT(e.commission_pct) AS commission_count
+FROM departments d
+LEFT JOIN employees e
+ON d.dept_id = e.dept_id
+GROUP BY d.dept_name;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+23  
+
+
+ View for Delhi location
+CREATE VIEW emp_view AS
+SELECT e.first_name,
+       e.employee_id,
+       d.dept_name,
+       l.city
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+JOIN locations l ON d.location_id = l.location_id
+WHERE l.city = 'Delhi';
+
+
+
+---output---
+
+
+
+done
+
+
+24  
+
+ From view: job title = Manager AND department = Finance
+
+
+SELECT first_name
+FROM emp_view
+WHERE dept_name = 'Finance';
+
+
+--output-----
+
+empty
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+25  
+
+ Update phone number through view
+UPDATE emp_view
+SET phone_no = '88888888'
+WHERE first_name = 'Rahul';
+
+26 
+
+ Employees with NO dependents (using NOT EXISTS)
+SELECT *
+FROM employees e
+WHERE NOT EXISTS (
+    SELECT *
+    FROM dependents d
+    WHERE d.employee_id = e.employee_id
+);
+
+
+
+27  
+
+
+ Employees whose manager_id is 101 or 201 (using UNION)
+SELECT *
+FROM employees
+WHERE manager_id = 101
+
+UNION
+
+SELECT *
+FROM employees
+WHERE manager_id = 201;
+
+28  
+
+Employees who have at least one dependent
+SELECT *
+FROM employees e
+WHERE EXISTS (
+    SELECT *
+    FROM dependents d
+    WHERE d.employee_id = e.employee_id
+);
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT d.dept_name,
+       AVG(e.salary) AS avg_salary,
+       COUNT(e.employee_id) AS employee_count
+FROM departments d
+LEFT JOIN employees e
+ON d.dept_id = e.dept_id
+GROUP BY d.dept_name;
+
+
+
+
+
+SELECT d.dept_name,
+       AVG(e.salary) AS avg_salary,
+       COUNT(e.employee_id) AS employee_count
+FROM departments d
+LEFT JOIN employees e
+ON d.dept_id = e.dept_id
+GROUP BY d.dept_name;
