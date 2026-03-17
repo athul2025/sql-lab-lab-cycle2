@@ -7,6 +7,11 @@ salary INT
 );
 
 
+INSERT INTO emp_salary VALUES
+(1,'Arun',20,'Assistant Professor',0),
+(2,'Rahul',22,'Clerk',0),
+(3,'Meera',25,'Programmer',0);
+
 
 DELIMITER //
 
