@@ -1,0 +1,65 @@
+CREATE TABLE emp_salary(
+emp_id INT,
+emp_name VARCHAR(50),
+no_of_working_days INT,
+designation VARCHAR(50),
+salary INT
+);
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE calculate_salary()
+
+BEGIN
+
+DECLARE done INT DEFAULT 0;
+DECLARE id INT;
+DECLARE days INT;
+DECLARE desig VARCHAR(50);
+DECLARE sal INT;
+
+DECLARE emp_cursor CURSOR FOR
+SELECT emp_id,no_of_working_days,designation
+FROM emp_salary;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+OPEN emp_cursor;
+
+read_loop: LOOP
+
+FETCH emp_cursor INTO id,days,desig;
+
+IF done = 1 THEN
+LEAVE read_loop;
+END IF;
+
+IF desig='Assistant Professor' THEN
+SET sal = days * 1750;
+
+ELSEIF desig='Clerk' THEN
+SET sal = days * 750;
+
+ELSEIF desig='Programmer' THEN
+SET sal = days * 1250;
+
+END IF;
+
+UPDATE emp_salary
+SET salary = sal
+WHERE emp_id = id;
+
+END LOOP;
+
+CLOSE emp_cursor;
+
+END //
+
+DELIMITER ;
+
+
+
+
+CALL calculate_salary();
