@@ -1,0 +1,48 @@
+CREATE TABLE employee(
+emp_id INT,
+emp_name VARCHAR(50),
+salary INT
+);
+
+
+
+CREATE TABLE Emp_history(
+emp_id INT,
+emp_name VARCHAR(50),
+salary INT,
+Date_of_deletion DATE
+);
+
+
+
+DELIMITER //
+
+CREATE TRIGGER emp_delete_trigger
+AFTER DELETE ON employee
+FOR EACH ROW
+BEGIN
+
+INSERT INTO Emp_history
+VALUES(OLD.emp_id, OLD.emp_name, OLD.salary, CURDATE());
+
+END //
+
+DELIMITER ;
+
+
+
+INSERT INTO employee VALUES
+(1,'Arun',30000),
+(2,'Rahul',25000);
+
+
+
+SELECT * FROM employee;
+
+
+
+DELETE FROM employee WHERE emp_id = 1;
+
+
+
+SELECT * FROM Emp_history;
